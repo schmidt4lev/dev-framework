@@ -32,7 +32,7 @@ jobs:
 
       - name: Keine Platzhalter übrig
         run: |
-          # Nur Framework-Platzhalter wie {{PROJECT_NAME}}; GitHub-Ausdrücke ${{ ... }} bleiben erlaubt
+          # Nur Framework-Platzhalter wie {{PROJECT_NAME}}; GitHub-Ausdrücke (Dollar plus doppelte geschweifte Klammer) bleiben erlaubt
           if grep -rnE '\{\{[A-Z_]+\}\}' "$RUNNER_TEMP/smoke-test" --exclude-dir=.git; then
             echo "::error::Nicht ersetzte Platzhalter gefunden."
             exit 1
