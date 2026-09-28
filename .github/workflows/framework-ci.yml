@@ -1,0 +1,51 @@
+# CI des Frameworks selbst (nicht der erzeugten Projekte).
+#
+# Prüft das Generator-Skript mit shellcheck und erzeugt testweise ein Projekt,
+# um sicherzustellen, dass keine Platzhalter übrig bleiben und alle Pflichtdateien
+# vorhanden sind. Das Template hat seine eigene CI unter template/.github/.
+name: Framework-CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  generator:
+    name: Generator prüfen
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: shellcheck
+        run: shellcheck scripts/*.sh
+
+      - name: Testprojekt erzeugen
+        run: |
+          git config --global user.name "CI"
+          git config --global user.email "ci@example.invalid"
+          # Sonderzeichen im Namen prüfen die Maskierung in replace_placeholders
+          scripts/new-project.sh "$RUNNER_TEMP/smoke-test" "Smoke & Test | CI"
+
+      - name: Keine Platzhalter übrig
+        run: |
+          # Nur Framework-Platzhalter wie {{PROJECT_NAME}}; GitHub-Ausdrücke (Dollar plus doppelte geschweifte Klammer) bleiben erlaubt
+          if grep -rnE '\{\{[A-Z_]+\}\}' "$RUNNER_TEMP/smoke-test" --exclude-dir=.git; then
+            echo "::error::Nicht ersetzte Platzhalter gefunden."
+            exit 1
+          fi
+
+      - name: Pflichtdateien vorhanden
+        run: |
+          cd "$RUNNER_TEMP/smoke-test"
+          for f in CLAUDE.md README.md CHANGELOG.md ARCHITECTURE.md DECISIONS.md ROADMAP.md \
+                   PROJECT_STATE.md .framework-version docs/engineering/PLAYBOOK.md \
+                   docs/engineering/CODING_STANDARDS.md docs/operations/RUNBOOK.md \
+                   docs/security/THREAT_MODEL.md .claude/settings.json \
+                   .github/workflows/ci.yml .github/pull_request_template.md; do
+            [ -f "$f" ] || { echo "::error::Pflichtdatei fehlt: $f"; exit 1; }
+          done
+          git log --oneline -1

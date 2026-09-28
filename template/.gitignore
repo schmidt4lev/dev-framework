@@ -1,0 +1,19 @@
+# Secrets und lokale Konfiguration: nie einchecken
+.env
+.env.local
+.env.*.local
+secrets/
+*.pem
+*.key
+
+# Editor und Betriebssystem
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# Lokale Claude-Einstellungen (persönlich, nicht geteilt)
+.claude/settings.local.json
+
+# TODO(kickoff): stack-spezifische Build- und Cache-Verzeichnisse ergänzen
