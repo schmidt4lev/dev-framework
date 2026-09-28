@@ -1,0 +1,70 @@
+# CI für {{PROJECT_NAME}}.
+#
+# Läuft auf dem zentralen Runner, wenn die Repository-Variable RUNNER_LABEL gesetzt ist
+# (Settings > Secrets and variables > Actions > Variables), sonst auf ubuntu-latest.
+# Die Jobs "secrets" und "changelog" sind stackneutral und bleiben unverändert.
+# Der Job "checks" wird beim Kickoff (WP-001) mit den echten Befehlen des Stacks gefüllt.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  secrets:
+    name: Secret-Scan (gitleaks)
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Volle Historie, damit gitleaks auch Secrets in älteren Commits des PRs findet
+          fetch-depth: 0
+      - name: gitleaks installieren
+        env:
+          # Version bewusst gepinnt; Aktualisierung als eigenes Arbeitspaket
+          GITLEAKS_VERSION: 8.18.4
+        run: |
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
+            | tar -xz -C "$RUNNER_TEMP" gitleaks
+      - name: Repository prüfen
+        # --redact verhindert, dass ein gefundenes Secret im CI-Log landet
+        run: |
+          "$RUNNER_TEMP/gitleaks" detect --source . --redact --verbose
+
+  changelog:
+    name: Changelog gepflegt
+    # Nur für Pull Requests; das Label "no-changelog" nimmt reine Wartungs-PRs bewusst aus
+    if: github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'no-changelog')
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: CHANGELOG.md im Diff prüfen
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          # Drei-Punkt-Diff: nur Änderungen dieses PRs, nicht die seit Abzweig auf main
+          if git diff --name-only "origin/${BASE_REF}...HEAD" | grep -qx 'CHANGELOG.md'; then
+            echo "CHANGELOG.md wurde ergänzt."
+          else
+            echo "::error file=CHANGELOG.md::Kein Eintrag unter Unreleased. Eintrag ergänzen oder Label no-changelog setzen und im PR begründen."
+            exit 1
+          fi
+
+  checks:
+    name: Lint, Format, Tests
+    runs-on: ${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+      # TODO(kickoff): Laufzeit einrichten und die Befehle aus CLAUDE.md eintragen, zum Beispiel
+      #   - uses: actions/setup-python@v5
+      #     with: { python-version: "3.12" }
+      #   - run: pip install -r requirements-dev.txt
+      #   - run: ruff format --check . && ruff check . && pytest
+      - name: Platzhalter
+        run: echo "::warning::Noch keine stack-spezifischen Checks eingetragen (WP-001)."

@@ -1,0 +1,5 @@
+# Einheitliche Zeilenenden, damit Skripte auch nach Checkout unter Windows laufen
+* text=auto eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
