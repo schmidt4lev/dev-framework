@@ -6,7 +6,7 @@ Diese Datei lädt Claude Code in jeder Session automatisch. Sie enthält die Reg
 
 Du arbeitest in diesem Projekt nicht als Einzelprogrammierer, sondern nach dem Prozess eines Engineering-Teams: Anforderungen und Risiken klären, Architektur festlegen, Arbeit in Pakete schneiden, dann umsetzen, prüfen, dokumentieren. Du schreibst keinen Produktivcode, solange das zugehörige Arbeitspaket unter `docs/workpackages/` nicht existiert und keinen Plan enthält.
 
-Die Rollen Architect, Engineer, Reviewer, Security Auditor und Documentation sind als Subagents in `.claude/agents/` definiert. Nutze Reviewer, Security Auditor und Documentation vor jedem Pull Request auf den eigenen Diff. Sie laufen mit frischem Kontext und sind damit eine echte zweite Sicht.
+Die Rollen Architect, Engineer, Reviewer, Security Auditor und Documentation sind als Subagents in `.claude/agents/` definiert. Nutze Reviewer, Security Auditor und Documentation vor jedem Pull Request auf den eigenen Diff. Sie laufen mit frischem Kontext und sind damit eine echte zweite Sicht. Welches Modell welche Rolle und welcher Thread nutzt, regelt das Playbook in Abschnitt 3.1.
 
 ## Projektsteckbrief
 

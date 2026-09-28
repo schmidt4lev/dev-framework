@@ -46,6 +46,24 @@ Die Rollen sind Claude-Code-Subagents in `.claude/agents/`. Jeder Subagent start
 
 Der **Service Owner** ist ein Mensch. Er erteilt die Freigaben G1 bis G3, entscheidet offene Fragen und trägt die Verantwortung für den Betrieb.
 
+### 3.1 Modellwahl pro Rolle und Thread
+
+Grundsatz: Das stärkere Modell dort, wo ein Fehler lange nachwirkt oder teuer entdeckt wird, das günstigere dort, wo die meisten Tokens anfallen und der Rahmen schon feststeht. Architektur und Security-Prüfung erzeugen wenig Volumen, aber ihre Fehler ziehen sich durch das ganze Projekt. Die Umsetzung erzeugt den Großteil der Tokens, arbeitet aber gegen einen freigegebenen Plan.
+
+| Rolle / Thread | Modell (Alias) | Begründung |
+|---|---|---|
+| Planungs-Thread, `architect` | `opus` | Entscheidungen mit Langzeitwirkung, geringes Volumen |
+| Umsetzungs-Thread, `engineer` | `sonnet` | größtes Token-Volumen, Plan und Architektur sind vorgegeben |
+| `reviewer` | `opus` | Fehler finden braucht mehr Urteilsvermögen als sie zu machen; ein stärkeres Modell als der Engineer ist eine echte zweite Sicht |
+| `security-auditor` | `opus` | ein übersehener Befund ist der teuerste Fehler im Prozess |
+| `docs-writer` | `sonnet` | Abgleich von Diff und Doku, sprachlich anspruchsvoll, aber gut eingegrenzt |
+
+Die Aliase stehen im Feld `model` der Subagent-Dateien in `.claude/agents/` und zeigen in Claude Code immer auf die aktuelle Generation. Stand 2026-09-28 (Framework {{FRAMEWORK_VERSION}}) sind das Claude Opus 5.5 (4 USD Input / 20 USD Output je Million Tokens) und Claude Sonnet 5 (2 / 10 USD), Sonnet kostet also die Hälfte. Claude Haiku 4.5 (1 / 5 USD) eignet sich für rein mechanische Suchen und Prüfungen, aber für keine der Rollen. Claude Fable 5.1 (10 / 50 USD) ist das stärkste Modell, kostet aber das 2,5-Fache von Opus und wird nur gezielt eingesetzt, etwa für eine besonders schwierige Architekturfrage oder eine Fehlersuche, an der Opus gescheitert ist. Bei einem Claude-Abo statt API-Abrechnung gilt dieselbe Logik, nur dass sich der Preis als schneller aufgebrauchtes Nutzungskontingent zeigt.
+
+Das Modell eines Threads wird beim Start festgelegt (in Claude Code mit `/model`). Ein Umsetzungs-Thread wechselt auf `opus`, wenn das Arbeitspaket Klasse L hat oder wenn derselbe Fehler nach zwei Anläufen nicht behoben ist; der Wechsel wird im Arbeitspaket vermerkt. Mehr bringt in der Regel eine höhere Effort-Stufe auf demselben Modell als ein Modellwechsel mitten in der Session, weil der Prompt-Cache modellgebunden ist.
+
+Die Zuordnung wird überprüft, wenn eine neue Modellgeneration erscheint oder wenn Reviews wiederholt Befunde finden, die der Engineer hätte vermeiden müssen.
+
 ## 4. Ablauf eines Arbeitspakets
 
 1. Thread starten mit `/wp-start WP-<nr>`. Claude liest Arbeitspaket, `PROJECT_STATE.md`, `ARCHITECTURE.md` und die relevanten ADRs.

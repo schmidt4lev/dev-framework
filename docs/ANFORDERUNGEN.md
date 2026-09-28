@@ -77,6 +77,12 @@ Einige Punkte waren im ursprünglichen Text nicht enthalten, sind aber für lang
 
 Das Template legt keine Programmiersprache fest. Sprache, Linter und Testwerkzeug werden beim Kickoff per ADR entschieden und in `CLAUDE.md` sowie der CI eingetragen. Für den Betrieb setzt das Template auf die vorhandene Umgebung: GitHub Actions auf den zentralen Runnern (Runner-Label über die Repository-Variable `RUNNER_LABEL`), Checkmk für Verfügbarkeit, Loki für Logs, Grafana für Dashboards, Semaphore für Deployments. Das Runbook-Template fragt diese Punkte ab, erzwingt aber keine Integration, die für ein Projekt keinen Sinn ergibt.
 
+### 2.12 Modellwahl nach Wirkung und Volumen
+
+Qualität und Token-Verbrauch hängen davon ab, welches Modell welche Arbeit macht. Alles auf dem stärksten Modell laufen zu lassen ist teuer, ohne dass die Umsetzung eines freigegebenen Plans davon nennenswert profitiert. Alles auf dem günstigen Modell laufen zu lassen spart an der falschen Stelle, nämlich bei Architektur und Security, wo wenig Tokens anfallen, Fehler aber am längsten nachwirken.
+
+Das Playbook ordnet deshalb Architect, Reviewer und Security Auditor dem Opus-Modell zu und Engineer sowie Documentation dem Sonnet-Modell, das zum Stand 2026-09-28 halb so viel kostet. Weil die Umsetzung den größten Teil der Tokens erzeugt, liegt dort auch der größte Hebel. Der Reviewer läuft bewusst auf einem stärkeren Modell als der Engineer, damit das Review nicht dieselben blinden Flecken hat. Die Zuordnung steht als Alias in den Subagent-Dateien, damit sie bei neuen Modellgenerationen ohne Änderung mitwandert, und wird bei jeder neuen Generation überprüft. Details und Eskalationsregeln stehen im Playbook in Abschnitt 3.1.
+
 ## 3. Was bewusst nicht Teil des Frameworks ist
 
 Das Framework automatisiert keine Deployments und enthält keine fertigen Monitoring-Konfigurationen, weil diese vom Stack und vom Zielsystem abhängen. Es enthält auch keinen Mechanismus, der Framework-Updates automatisch in bestehende Projekte überträgt. Ein solcher Mechanismus würde projektspezifische Anpassungen überschreiben. Der vorgesehene Weg ist ein Vergleich der Template-Stände zwischen zwei Framework-Versionen und die bewusste Übernahme der relevanten Teile, beschrieben im README.

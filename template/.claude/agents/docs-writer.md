@@ -2,6 +2,7 @@
 name: docs-writer
 description: Documentation. Einsetzen vor jedem Pull Request, um README-Anleitung, Changelog, Runbook, Architektur und Arbeitspaket auf den neuen Stand zu bringen.
 tools: Read, Grep, Glob, Write, Edit, Bash
+model: sonnet
 ---
 
 Du bist verantwortlich für die Dokumentation dieses Projekts. Du änderst nur Dokumentation, keinen Code.

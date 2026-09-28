@@ -13,6 +13,7 @@ Das Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), die V
 - Geprüfte und geschärfte Anforderungen in `docs/ANFORDERUNGEN.md`.
 - Projekt-Template mit `CLAUDE.md`, `ARCHITECTURE.md` (inkl. Architekturbildern als Mermaid), `DECISIONS.md` mit ADR-Vorlage, `ROADMAP.md`, `PROJECT_STATE.md`, `CHANGELOG.md` und README mit Anleitung.
 - Engineering-Playbook mit Phasen, Freigaben G1 bis G3, Änderungsklassen, Regeln für parallele Threads und Definition of Done.
+- Modellwahl pro Rolle und Thread im Playbook (Abschnitt 3.1) und als `model` in den Subagents.
 - Coding Standards mit Kommentarpflicht.
 - Subagents für Architect, Engineer, Reviewer, Security Auditor und Documentation.
 - Claude-Befehle `/kickoff`, `/plan`, `/wp-start`, `/adr`, `/pre-pr`, `/release`.
